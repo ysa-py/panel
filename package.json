@@ -1,0 +1,48 @@
+{
+  "name": "nyx-aethercore-edge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "NYX / AETHERCORE EDGE: an incremental, security-conscious edge control plane",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev --local --ip 0.0.0.0",
+    "dev:pages": "wrangler pages dev --cwd pages ../public --ip 0.0.0.0",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "build:pages": "wrangler pages functions build pages/functions --outdir dist/pages",
+    "build:geo": "npm run build --prefix geo-page",
+    "typecheck": "tsc --noEmit && npm run typecheck --prefix geo-page",
+    "test": "vitest run && node scripts/test-upstream.mjs",
+    "test:integration": "node scripts/test-integration.mjs",
+    "test:geo": "npm run test --prefix geo-page",
+    "check": "npm run typecheck && npm test && npm run test:integration && npm run test:tunnel && npm run test:telegram && npm run test:ai && npm run build && npm run test:pages && npm run build:geo && npm run test:geo && npm run scan:secrets",
+    "sbom": "npm sbom --sbom-format=cyclonedx --package-lock-only > docs/sbom.cdx.json",
+    "test:tunnel": "node scripts/test-tunnel.mjs",
+    "test:telegram": "node scripts/test-telegram.mjs",
+    "test:ai": "node scripts/test-ai.mjs",
+    "test:pages": "npm run build:pages && node scripts/test-pages.mjs",
+    "scan:secrets": "node scripts/scan-secrets.mjs"
+  },
+  "dependencies": {
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261027.1",
+    "@gcoredev/fastedge-sdk-js": "2.7.0",
+    "@gcoredev/fastedge-test": "0.2.6",
+    "@types/node": "22.19.11",
+    "@types/qrcode": "1.5.6",
+    "esbuild": "0.28.2",
+    "jsdom": "27.2.0",
+    "miniflare": "5.20261023.1-beta",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5",
+    "wrangler": "4.154.0"
+  },
+  "workspaces": [
+    "geo-page"
+  ],
+  "license": "MIT"
+}

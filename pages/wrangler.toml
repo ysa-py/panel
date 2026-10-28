@@ -1,0 +1,13 @@
+name = "nyx-aethercore-edge-pages"
+compatibility_date = "2026-06-01"
+pages_build_output_dir = "../public"
+
+# Replace with a real D1 UUID before deploying; use a separate DB for previews.
+[[d1_databases]]
+binding = "GZ_DB"
+database_name = "nyx-aethercore"
+database_id = "local-development-only"
+
+# To use remote Workers AI, explicitly enable it and add:
+# [ai]
+# binding = "AI"
