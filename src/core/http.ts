@@ -1,10 +1,26 @@
 /** Shared HTTP safeguards; data crossing the network is always untrusted. */
-import { GzError } from '../config';
+import { Env, GzError } from '../config';
 
-export function isSameOriginMutation(request: Request): boolean {
+/**
+ * Sandbox preview only: the preview reaches this Worker through a proxy that
+ * terminates TLS and forwards the request under the sandbox host, so the
+ * browser's Origin (the public preview host) never equals this Worker's own
+ * request origin. Accept that one exact public origin only when the sandbox
+ * sets BASE44_PREVIEW_MODE=1; unset or any other value keeps the original
+ * exact same-origin requirement.
+ */
+export function previewOrigin(env?: Env): string | null {
+  if (env?.BASE44_PREVIEW_MODE !== '1') return null;
+  const suffix = env.BASE44_PUBLIC_HOST_SUFFIX;
+  return suffix ? 'https://3000-' + suffix : null;
+}
+
+export function isSameOriginMutation(request: Request, env?: Env): boolean {
   if (!['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method)) return true;
-  return request.headers.get('origin') === new URL(request.url).origin &&
-    /^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type') || '');
+  const origin = request.headers.get('origin');
+  const expected = previewOrigin(env);
+  if (origin !== new URL(request.url).origin && (expected === null || origin !== expected)) return false;
+  return /^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type') || '');
 }
 
 export async function readJsonObject(request: Request, maxBytes = 32 * 1024): Promise<Record<string, unknown>> {

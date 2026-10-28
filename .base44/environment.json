@@ -1,0 +1,14 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "notes": "Cloudflare Worker run from source with `wrangler dev` (Miniflare). Local D1 lives in .wrangler/state inside the repository bind mount; there is no database service. Operational routes stay closed (HTTP 503) until NYX_BOOTSTRAP_PASSWORD is set.",
+  "secrets": [
+    {
+      "name": "NYX_BOOTSTRAP_PASSWORD",
+      "description": "Panel sign-in password, 16-256 characters. It seeds the admin account and the panel password hash on the first operational request, so the value entered here is the one used to sign in at /panel. No value is generated for it on purpose: a generated placeholder could never be typed at the login form, and once the hash is stored a different secret no longer changes the password (wipe .wrangler/state to re-bootstrap).",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": false
+    }
+  ]
+}

@@ -24,6 +24,9 @@ export interface Env {
   NYX_TELEGRAM_CHAT_ID?: string;
   NYX_TELEGRAM_DAILY_REPORT?: string;
   AI?: { run(model: string, inputs: Record<string, unknown>): Promise<unknown> };
+  /** Base44 sandbox preview only (docker-compose.base44.yml); unset elsewhere. */
+  BASE44_PREVIEW_MODE?: string;
+  BASE44_PUBLIC_HOST_SUFFIX?: string;
 }
 
 /** Error type carrying a short machine code for the panel API. */

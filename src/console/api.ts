@@ -16,7 +16,7 @@ async function ensureProbes(db: D1Database): Promise<void> {
 
 export async function handleConsoleApi(request: Request, env: Env, eff: EffectiveSettings, action: string): Promise<Response> {
   try {
-    if (!isSameOriginMutation(request)) return jsonResponse({ error: 'same_origin_json_required' }, 403);
+    if (!isSameOriginMutation(request, env)) return jsonResponse({ error: 'same_origin_json_required' }, 403);
     await requireAuth(request, eff);
     const db = env.GZ_DB;
     if (!db) throw new GzError('database_not_bound', 'no_db');

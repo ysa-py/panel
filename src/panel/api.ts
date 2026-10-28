@@ -52,7 +52,7 @@ export async function handlePanelApi(
   try {
     // Browser mutations require an exact same-origin request and JSON. This
     // also protects the login endpoint against login CSRF.
-    if (!isSameOriginMutation(request)) return json({ error: 'same_origin_json_required' }, 403);
+    if (!isSameOriginMutation(request, env)) return json({ error: 'same_origin_json_required' }, 403);
     /* ---------------- public ---------------- */
 
     if (action === 'status' && method === 'GET') {

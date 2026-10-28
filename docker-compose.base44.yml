@@ -1,0 +1,80 @@
+# Base44 sandbox environment for NYX / AETHERCORE EDGE.
+#
+# The app is a Cloudflare Worker. It runs here from the cloned source through
+# `wrangler dev` (Miniflare + a local D1 database), not from a built image, so
+# source edits are picked up by wrangler's file watcher.
+#
+# There is no database service: D1 in local mode is a SQLite file under
+# .wrangler/state, which lives in the bind-mounted repository and therefore
+# survives container restarts. Operational routes stay closed (HTTP 503) until
+# NYX_BOOTSTRAP_PASSWORD is provided as a platform secret.
+#
+# Start: docker compose -f docker-compose.base44.yml up -d
+# Health: curl -s localhost:3000/   (console shell; /healthz needs the secret)
+
+name: nyx-aethercore-edge
+
+services:
+  web:
+    # Full node:22 image, not node:22-slim: the Workers runtime (workerd) refuses
+    # to start without system CA certificates, which slim images omit.
+    image: node:22
+    working_dir: /app
+    command:
+      - sh
+      - -ec
+      - |
+        npm ci --no-audit --no-fund
+        # wrangler dev reads bindings only from .dev.vars, so materialise them
+        # from the container environment at start-up. Secrets come from the
+        # platform-managed env file (see env_file below); nothing is hardcoded
+        # here and an unset password keeps the app fail-closed.
+        : > .dev.vars
+        for key in NYX_BOOTSTRAP_PASSWORD NYX_AI_ENABLED NYX_AI_DAILY_LIMIT \
+                   BASE44_PREVIEW_MODE BASE44_PUBLIC_HOST_SUFFIX; do
+          value=$$(printenv "$$key" || true)
+          if [ -n "$$value" ]; then printf '%s=%s\n' "$$key" "$$value" >> .dev.vars; fi
+        done
+        exec npx wrangler dev --local --ip 0.0.0.0 --port 8787
+    ports:
+      - "3000:8787"
+    volumes:
+      - .:/app
+      - nyx-node-modules:/app/node_modules
+      - nyx-npm-cache:/root/.npm
+    env_file:
+      - /run/base44/app.env
+    environment:
+      # Bare pass-through: the platform sets BASE44_PREVIEW_MODE=1 and the host
+      # suffix, which the Worker uses to accept the preview origin (see AGENTS.md).
+      - BASE44_PREVIEW_MODE
+      - BASE44_PUBLIC_HOST_SUFFIX
+      - NODE_ENV=development
+      - WRANGLER_SEND_METRICS=false
+    labels:
+      base44.project: NYX · Aethercore Edge
+      base44.kind: web
+      base44.port: "3000"
+    restart: on-failure
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - |
+          const status = async (path) => { try { const r = await fetch('http://127.0.0.1:8787' + path); return r.status; } catch { return 0; } };
+          (async () => {
+            const shell = await status('/');
+            const api = await status('/healthz');
+            if (shell !== 200) { console.error('frontend shell / returned ' + shell); process.exit(1); }
+            if (api !== 200 && api !== 503) { console.error('worker api /healthz returned ' + api); process.exit(1); }
+            process.exit(0);
+          })();
+      interval: 15s
+      timeout: 10s
+      retries: 4
+      start_period: 240s
+
+volumes:
+  nyx-node-modules:
+  nyx-npm-cache:
