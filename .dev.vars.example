@@ -1,0 +1,15 @@
+# Copy to .dev.vars for local development, then replace the example locally.
+# NEVER commit real credentials. Minimum password length: 16 characters.
+NYX_BOOTSTRAP_PASSWORD="replace-locally-with-a-long-random-password"
+# Remote AI is opt-in and may incur cost. Its catalog also needs the account ID
+# and a read-only Workers AI token stored as provider secrets, not in source.
+NYX_AI_ENABLED="false"
+NYX_AI_DAILY_LIMIT="5"
+# NYX_CF_ACCOUNT_ID=""
+# NYX_CF_AI_READ_TOKEN=""
+# NYX_AI_MODEL_ALLOWLIST=""
+# NYX_PROBE_URLS=""
+# Optional one-way Telegram notifications: use new restricted provider secrets.
+# NYX_TELEGRAM_BOT_TOKEN=""
+# NYX_TELEGRAM_CHAT_ID=""
+# NYX_TELEGRAM_DAILY_REPORT="false"

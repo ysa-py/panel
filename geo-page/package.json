@@ -1,0 +1,20 @@
+{
+  "name": "nyx-fastedge-geo-page",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && fastedge-build --input ./src/index.ts --output ./wasm/geo-page.wasm --tsconfig ./tsconfig.json",
+    "test": "node ./tests/wasm.test.mjs"
+  },
+  "devDependencies": {
+    "@gcoredev/fastedge-sdk-js": "2.7.0",
+    "@gcoredev/fastedge-test": "0.2.6",
+    "typescript": "5.9.3"
+  },
+  "license": "MIT"
+}
